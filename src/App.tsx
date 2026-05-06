@@ -1260,8 +1260,14 @@ function TabMetas({ athletes, categories, onAddGoal, onToggleGoal, onDeleteGoal,
   isReadOnly?: boolean;
   key?: string;
 }) {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>(athletes[0]?.id || '');
   const [newGoalText, setNewGoalText] = useState('');
+
+  const filteredAthletes = useMemo(() => {
+    if (selectedCategoryId === 'ALL') return athletes;
+    return athletes.filter(a => a.categoryId === selectedCategoryId);
+  }, [athletes, selectedCategoryId]);
 
   const selectedAthlete = useMemo(() => {
     return athletes.find(a => a.id === selectedAthleteId);
@@ -1288,12 +1294,33 @@ function TabMetas({ athletes, categories, onAddGoal, onToggleGoal, onDeleteGoal,
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:h-[calc(100vh-250px)]">
         {/* Left: Athlete Selector */}
-        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden max-h-[300px] lg:max-h-none">
-          <div className="p-4 border-b border-gray-50 bg-gray-50/50 shrink-0">
-            <h3 className="text-[10px] font-black text-gray-400 p-1 uppercase tracking-widest">Selecionar Atleta</h3>
+        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden max-h-[400px] lg:max-h-none">
+          <div className="p-4 border-b border-gray-50 bg-gray-50/50 shrink-0 space-y-3">
+            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Filtrar por Categoria</h3>
+            <select 
+              value={selectedCategoryId}
+              onChange={(e) => {
+                setSelectedCategoryId(e.target.value);
+                // Reset selection if current athlete is not in filtered list
+                const newFiltered = e.target.value === 'ALL' ? athletes : athletes.filter(a => a.categoryId === e.target.value);
+                if (newFiltered.length > 0 && !newFiltered.some(a => a.id === selectedAthleteId)) {
+                  setSelectedAthleteId(newFiltered[0].id);
+                }
+              }}
+              className="w-full bg-white border border-gray-200 text-xs font-bold px-3 py-2 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none"
+            >
+              <option value="ALL">TODAS AS CATEGORIAS</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {athletes.map(athlete => (
+            {filteredAthletes.length === 0 ? (
+              <div className="p-4 text-center text-gray-400 text-xs italic">
+                Nenhum atleta nesta categoria.
+              </div>
+            ) : filteredAthletes.map(athlete => (
               <button
                 key={athlete.id}
                 onClick={() => setSelectedAthleteId(athlete.id)}
