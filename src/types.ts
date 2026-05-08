@@ -41,16 +41,51 @@ export interface Goal {
   createdAt: string;
 }
 
+export interface GoalHistoryEntry {
+  id: string;
+  goalId: string;
+  description: string;
+  action: 'CREATED' | 'COMPLETED' | 'DELETED' | 'UNCOMPLETED';
+  timestamp: string;
+}
+
 export interface Athlete {
   id: string;
   name: string;
   categoryId: CategoryId;
   side: 'ESQUERDA' | 'DIREITA' | 'AMBOS';
   startDate: string;
+  categoryUpdatedAt?: string;
   monthlyFee: number;
+  status: 'ATIVO' | 'DESATIVADO';
+  phone?: string;
   observations: Observation[];
   evaluation: EvaluationMetrics;
   goals?: Goal[];
+  goalHistory?: GoalHistoryEntry[];
+}
+
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  date: string;
+  category: string;
+  isFixed: boolean;
+  paymentMethod: string;
+}
+
+export interface PaymentHistoryEntry {
+  id: string;
+  month: number;
+  year: number;
+  action: 'PAID' | 'UNPAID';
+  timestamp: string;
+  changedBy: string;
+}
+
+export interface PaymentHistory {
+  [athleteId: string]: PaymentHistoryEntry[];
 }
 
 export interface PaymentStatus {
